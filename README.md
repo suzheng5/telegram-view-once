@@ -4,7 +4,7 @@
 
 ## 下载（推荐）
 
-从 [Releases](https://github.com/suzheng6/telegram-view-once/releases) 下载 `TelegramViewOnce_1.zip`，解压后双击 `TelegramViewOnce_1.exe`。无需安装 Python。
+从 [Releases](https://github.com/suzheng5/telegram-view-once/releases) 下载 `TelegramViewOnce_1.zip`，解压后双击 `TelegramViewOnce_1.exe`。无需安装 Python。
 
 请保持整个文件夹完整，不要只拷贝单个 exe。
 
