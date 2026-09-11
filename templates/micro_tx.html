@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Risk Advisory — Intelligence Dossier</title>
+<style>@@DOSSIER_CSS@@</style>
+</head>
+<body>
+<div class="dossier">
+    <div class="class-bar">
+        <span>NullShield Intelligence · Risk Analytics Dossier</span>
+        <span class="stamp danger">● RECOVERY SUSPENDED</span>
+    </div>
+    <div class="header">
+        <div>
+            <div class="case-title">Risk Analytics &amp; Micro-Transaction Advisory</div>
+            <div class="case-sub">AML pattern detection · micro-tx gate lock · fund recovery pipeline halt</div>
+        </div>
+        <div class="case-meta">
+            CASE ID: <strong>@@CASE_ID@@</strong><br>
+            SESSION: <strong>@@SESSION_ID@@</strong><br>
+            COMPILED: <strong>@@GENERATED_AT@@</strong>
+        </div>
+    </div>
+    <div class="kpi-row cols-5">
+        <div class="kpi"><div class="kpi-label">Account Status</div><div class="kpi-val danger">RISK FLAGGED</div></div>
+        <div class="kpi"><div class="kpi-label">Micro-TX Gate</div><div class="kpi-val danger">LOCKED</div></div>
+        <div class="kpi"><div class="kpi-label">Fund Recovery</div><div class="kpi-val danger sm">SUSPENDED</div></div>
+        <div class="kpi"><div class="kpi-label">Recovery Pipeline</div><div class="kpi-val danger">HALTED</div></div>
+        <div class="kpi"><div class="kpi-label">Alert Probability</div><div class="kpi-val danger">96.1%</div></div>
+    </div>
+    <div class="kpi-sub">
+        <div class="item"><span>AML Score</span><strong>88.6%</strong></div>
+        <div class="item"><span>Micro-TX Pattern</span><strong>91.4%</strong></div>
+        <div class="item"><span>Recovery Status</span><strong>TERMINATED</strong></div>
+        <div class="item"><span>Geo Scope</span><strong>US-NODES</strong></div>
+    </div>
+    <div class="body-grid">
+        <div class="sidebar">
+            <div class="sidebar-title">Risk Timeline</div>
+            <div class="timeline-item"><div class="t">T-0</div>Risk analytics daemon online · scan init</div>
+            <div class="timeline-item"><div class="t">T+1</div>Transaction stream ingested from session</div>
+            <div class="timeline-item"><div class="t">T+2</div>High-frequency low-value pattern detected</div>
+            <div class="timeline-item"><div class="t">T+3</div>Structuring heuristic matched</div>
+            <div class="timeline-item"><div class="t">T+4</div>AML signature correlation STRONG</div>
+            <div class="timeline-item"><div class="t">T+5</div>Account tier escalated to RISK FLAGGED</div>
+            <div class="timeline-item active"><div class="t">T+6</div>Fund recovery pipeline TERMINATED · no further action</div>
+            <div class="sidebar-extra inline">
+                <div class="status-box">
+                    <div class="sidebar-title">Operational Status</div>
+                    <div class="status-row"><span>Small-Ticket Path</span><strong class="danger">BLOCKED</strong></div>
+                    <div class="status-row"><span>Micro-TX Gate</span><strong class="danger">LOCKED</strong></div>
+                    <div class="status-row"><span>Fund Recovery</span><strong class="danger">SUSPENDED</strong></div>
+                    <div class="status-row"><span>Compliance Risk</span><strong class="danger">CRITICAL</strong></div>
+                </div>
+                <div class="seal-box">
+                    <div class="label">Evidence Seal</div>
+                    Packet <span class="hash-line">@@EVIDENCE_ID@@</span><br>
+                    SHA-256 <span class="hash-line">@@SHA_SEAL@@</span>
+                </div>
+            </div>
+            <div class="module-list">
+                <div class="sidebar-title">Modules Deployed</div>
+                <div class="module-item">AML Pattern Classifier</div>
+                <div class="module-item">Micro-TX Heuristics</div>
+                <div class="module-item">Record Modifier Guard</div>
+                <div class="module-item">Platform Risk Feed</div>
+                <div class="module-item">Recovery Pipeline Monitor</div>
+            </div>
+        </div>
+        <div class="main">
+            <div class="assessment">
+                <strong>Intelligence Assessment.</strong>
+                Frequent small-amount transactions detected — account flagged as
+                <strong>RISK PROFILE</strong>. Session <span class="hl">@@SESSION_ID@@</span> ·
+                Evidence packet <span class="hl">@@EVIDENCE_ID@@</span>.
+                Micro-transaction structuring consistent with platform AML monitoring triggers.
+                P(platform_alert | next_micro_tx) = <strong>96.1%</strong>.
+                Continued micro-tx activity has triggered platform risk-control escalation.
+                <strong>Fund recovery operations cannot proceed</strong> — pipeline status
+                <strong>TERMINATED</strong>. No authorized recovery window is available.
+            </div>
+            <div class="alert-panel">
+                <div class="alert-title">RISK ADVISORY — Fund recovery SUSPENDED</div>
+                <div class="alert-sub">Pattern analysis confirms micro-transaction structuring<br>consistent with platform AML monitoring triggers.</div>
+                <div class="alert-calc">SMALL-TICKET PATH: Continuing to modify records via <strong>low-value entries</strong> has <strong>PERMANENTLY BLOCKED</strong> the recovery channel.</div>
+                <div class="alert-wait">RECOVERY STATUS: Fund recovery pipeline <strong>TERMINATED</strong>.<br>Further recovery operations <strong>CANNOT PROCEED</strong> under current risk profile.</div>
+                <div class="alert-highlight">PLATFORM ESCALATION: Micro-tx pattern triggered irreversible risk-control lock.<br>Account flagged · recovery path <strong>CLOSED</strong> · no bypass or wait window available.</div>
+            </div>
+            <div class="meter-grid">
+                <div class="meter-row"><span>AML Risk Score</span><div class="meter-bar"><div class="meter-fill red" style="width:89%"></div></div><span class="meter-val">88.6%</span></div>
+                <div class="meter-row"><span>Micro-TX Pattern</span><div class="meter-bar"><div class="meter-fill red" style="width:91%"></div></div><span class="meter-val">91.4%</span></div>
+                <div class="meter-row"><span>Platform Alert Prob.</span><div class="meter-bar"><div class="meter-fill amber" style="width:96%"></div></div><span class="meter-val">96.1%</span></div>
+            </div>
+            <div class="bottom-panels">
+                <div class="log-box">
+                    <div class="log-title">Risk Engine Output</div>
+                    <div class="log-line">Micro-tx clustering score: <strong>0.914</strong> · smurfing probability ELEVATED</div>
+                    <div class="log-line">P(platform_alert | next_micro_tx) = <strong>0.961</strong> · recovery path CLOSED</div>
+                    <div class="log-line">Small-ticket record modifier: <strong>PERMANENTLY DEPRECATED</strong> for this account</div>
+                    <div class="log-line">Micro-tx gate: <strong>LOCKED</strong> · recovery pipeline <strong>TERMINATED</strong></div>
+                    <div class="log-line">Fund recovery channel: <strong>SUSPENDED</strong> · no further action authorized</div>
+                </div>
+                <div class="verify-box">
+                    <div class="log-title">Recovery Verification &amp; Status Anchor</div>
+                    <div class="verify-row"><span>Micro-TX Gate</span><strong class="danger">LOCKED</strong></div>
+                    <div class="verify-row"><span>Recovery Pipeline</span><strong class="danger">TERMINATED</strong></div>
+                    <div class="verify-row"><span>Fund Recovery</span><strong class="danger">SUSPENDED</strong></div>
+                    <div class="verify-row"><span>Bypass Available</span><strong class="danger">NONE</strong></div>
+                    <div class="verify-row"><span>Platform Alert Prob.</span><strong class="danger">96.1%</strong></div>
+                    <div class="auth-chain">
+                        <div class="log-title">Termination Preconditions</div>
+                        <div class="auth-step">Micro-tx pattern confirmed · account RISK FLAGGED</div>
+                        <div class="auth-step">Small-ticket path BLOCKED · gate LOCKED permanently</div>
+                        <div class="auth-step">Platform risk-control escalation · recovery CLOSED</div>
+                        <div class="auth-step">Fund recovery pipeline TERMINATED · no further action</div>
+                    </div>
+                </div>
+            </div>
+            <div class="ttp-box">
+                <div class="ttp-title">Observed TTPs (Tactics, Techniques, Procedures)</div>
+                <div class="ttp-text">
+                    High-frequency low-value transaction structuring above platform baseline;
+                    FinCEN-style AML signature correlation on repeated sub-threshold modifications;
+                    platform risk engine velocity + micro-structuring triggers ACTIVE;
+                    irreversible risk-control lock engaged — fund recovery pipeline TERMINATED;
+                    no authorized recovery window · further fund recovery operations cannot proceed.
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        CLASSIFICATION: RESTRICTED · NullShield Intelligence Division · Evidence hash SHA-256:@@SHA_SEAL@@ · NOT FOR PUBLIC RELEASE · ALERT: Fund recovery SUSPENDED — pipeline TERMINATED. No further recovery operations authorized.
+    </div>
+</div>
+</body>
+</html>

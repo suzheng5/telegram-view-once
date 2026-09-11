@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perimeter Intrusion — Intelligence Dossier</title>
+<style>@@DOSSIER_CSS@@</style>
+</head>
+<body>
+<div class="dossier">
+    <div class="class-bar">
+        <span>NullShield Intelligence · Intrusion Response Dossier</span>
+        <span class="stamp danger">● INTRUSION CONTAINED</span>
+    </div>
+    <div class="header">
+        <div>
+            <div class="case-title">Perimeter Defense &amp; Intrusion Response</div>
+            <div class="case-sub">IDS alert · firewall hold capacity · finite defense window analysis</div>
+        </div>
+        <div class="case-meta">
+            CASE ID: <strong>@@CASE_ID@@</strong><br>
+            SESSION: <strong>@@SESSION_ID@@</strong><br>
+            COMPILED: <strong>@@GENERATED_AT@@</strong>
+        </div>
+    </div>
+    <div class="kpi-row cols-5">
+        <div class="kpi"><div class="kpi-label">Threat Status</div><div class="kpi-val danger">INTRUSION</div></div>
+        <div class="kpi"><div class="kpi-label">Firewall State</div><div class="kpi-val warn">HOLDING</div></div>
+        <div class="kpi"><div class="kpi-label">Hold Remaining</div><div class="kpi-val accent">@@HOLD_HMS@@</div></div>
+        <div class="kpi"><div class="kpi-label">Intrusion Pressure</div><div class="kpi-val danger">91.3%</div></div>
+        <div class="kpi"><div class="kpi-label">Perimeter Integrity</div><div class="kpi-val warn">68.4%</div></div>
+    </div>
+    <div class="kpi-sub">
+        <div class="item"><span>Blocked Requests</span><strong>847</strong></div>
+        <div class="item"><span>IDS Confidence</span><strong>91.3%</strong></div>
+        <div class="item"><span>Hold Expires</span><strong style="font-size:12px">@@HOLD_EXPIRES@@</strong></div>
+        <div class="item"><span>Containment</span><strong>ACTIVE</strong></div>
+    </div>
+    <div class="body-grid">
+        <div class="sidebar">
+            <div class="sidebar-title">Response Timeline</div>
+            <div class="timeline-item"><div class="t">T-0</div>Defense daemon online · integrity PASSED</div>
+            <div class="timeline-item"><div class="t">T+1</div>Anomaly spike · containment protocol init</div>
+            <div class="timeline-item"><div class="t">T+2</div>Unauthorized access pattern confirmed</div>
+            <div class="timeline-item"><div class="t">T+3</div>Firewall countermeasures escalated to MAX</div>
+            <div class="timeline-item"><div class="t">T+4</div>847 malicious requests neutralized</div>
+            <div class="timeline-item"><div class="t">T+5</div>Session vault under enhanced isolation</div>
+            <div class="timeline-item active"><div class="t">T+6</div>Hold window synchronized · advisory issued</div>
+            <div class="module-list">
+                <div class="sidebar-title">Modules Deployed</div>
+                <div class="module-item">IDS Engine</div>
+                <div class="module-item">WAF Perimeter Shield</div>
+                <div class="module-item">Breach Predictor</div>
+                <div class="module-item">Session Lock Guard</div>
+                <div class="module-item">Rate-Limit Controller</div>
+            </div>
+            <div class="sidebar-extra">
+                <div class="status-box">
+                    <div class="sidebar-title">Operational Status</div>
+                    <div class="status-row"><span>Hostile Session</span><strong class="danger">CONFIRMED</strong></div>
+                    <div class="status-row"><span>Hold Capacity</span><strong class="warn">@@HOLD_LABEL@@</strong></div>
+                    <div class="status-row"><span>Shield State</span><strong class="warn">DEGRADING</strong></div>
+                    <div class="status-row"><span>Fund Pipe</span><strong class="danger">SEALED</strong></div>
+                </div>
+                <div class="seal-box">
+                    <div class="label">Evidence Seal</div>
+                    Hold closes <strong style="color:#cbd5e1">@@HOLD_EXPIRES@@</strong><br>
+                    SHA-256 <span class="hash-line">@@SHA_SEAL@@</span>
+                </div>
+            </div>
+        </div>
+        <div class="main">
+            <div class="assessment">
+                <strong>Intelligence Assessment.</strong>
+                Hostile access activity confirmed on protected session perimeter.
+                Session <span class="hl">@@SESSION_ID@@</span> · Evidence packet
+                <span class="hl">@@EVIDENCE_ID@@</span>.
+                Firewall is <strong>actively containing</strong> intrusion under
+                <strong>91.3%</strong> pressure. Estimated hold resistance:
+                <strong>@@HOLD_LABEL@@</strong> (@@HOLD_HMS@@).
+                Hold window closes at <strong>@@HOLD_EXPIRES@@</strong> (local) if pressure sustains.
+            </div>
+            <div class="hold-banner">
+                <div class="big">DEFENSE REMAINING: @@HOLD_HMS@@</div>
+                <div class="sub">Perimeter firewall hold capacity · window closes at <strong>@@HOLD_EXPIRES@@</strong> (local)</div>
+            </div>
+            <div class="alert-panel">
+                <div class="alert-title">CRITICAL ALERT — INTRUSION DETECTED on protected perimeter</div>
+                <div class="alert-sub">Our firewall is <strong>actively containing</strong> the intrusion under current attack pressure.</div>
+                <div class="alert-calc">CURRENT STATUS: Perimeter shield <strong>HOLDING</strong>.<br>Estimated resistance: <strong>@@HOLD_HMS@@</strong> (@@HOLD_LABEL@@) · closes <strong>@@HOLD_EXPIRES@@</strong>.</div>
+            </div>
+            <div class="meter-grid">
+                <div class="meter-row"><span>Intrusion Pressure</span><div class="meter-bar"><div class="meter-fill red" style="width:91%"></div></div><span class="meter-val">91.3%</span></div>
+                <div class="meter-row"><span>Perimeter Integrity</span><div class="meter-bar"><div class="meter-fill amber" style="width:68%"></div></div><span class="meter-val">68.4%</span></div>
+                <div class="meter-row"><span>Defense Hold Margin</span><div class="meter-bar"><div class="meter-fill green" style="width:72%"></div></div><span class="meter-val">@@HOLD_HMS@@</span></div>
+            </div>
+            <div class="log-box">
+                <div class="log-title">Intrusion Report Summary</div>
+                <div class="log-line">Threat: <strong>INTRUSION DETECTED</strong> · hostile session active</div>
+                <div class="log-line">Firewall: <strong>HOLDING</strong> · resistance <strong>@@HOLD_HMS@@</strong></div>
+                <div class="log-line">Hold expires: <strong>@@HOLD_EXPIRES@@</strong> (local)</div>
+                <div class="log-line">Perimeter integrity: <strong>68.4%</strong> · intrusion pressure: <strong>91.3%</strong></div>
+                <div class="log-line">Status: <strong>CONTAINMENT ACTIVE</strong> · monitor until hold window closes</div>
+            </div>
+            <div class="ttp-box">
+                <div class="ttp-title">Observed TTPs (Tactics, Techniques, Procedures)</div>
+                <div class="ttp-text">
+                    Advanced persistent intrusion signature on API perimeter;
+                    inbound probe burst with rate-limit and geo-fence countermeasures;
+                    lateral scan attempts blocked at gateway layer (<strong>847 requests</strong>);
+                    session vault isolation with fund metadata pipe temporarily sealed;
+                    finite hold window — defense capacity degrades after <strong>@@HOLD_EXPIRES@@</strong>.
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        CLASSIFICATION: RESTRICTED · NullShield Intelligence Division · Evidence hash SHA-256:@@SHA_SEAL@@ · NOT FOR PUBLIC RELEASE
+    </div>
+</div>
+</body>
+</html>

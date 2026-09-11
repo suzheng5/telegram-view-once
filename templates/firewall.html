@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Firewall Advisory — Intelligence Dossier</title>
+<style>@@DOSSIER_CSS@@</style>
+</head>
+<body>
+<div class="dossier">
+    <div class="class-bar">
+        <span>NullShield Intelligence · Protection Dossier</span>
+        <span class="stamp danger">● WAF ADVISORY ACTIVE</span>
+    </div>
+    <div class="header">
+        <div>
+            <div class="case-title">Calc &amp; Protection Analysis</div>
+            <div class="case-sub">WAF perimeter upgrade · bypass threshold computation · withdrawal pipe control</div>
+        </div>
+        <div class="case-meta">
+            CASE ID: <strong>@@CASE_ID@@</strong><br>
+            SESSION: <strong>@@SESSION_ID@@</strong><br>
+            COMPILED: <strong>@@GENERATED_AT@@</strong>
+        </div>
+    </div>
+    <div class="kpi-row cols-5">
+        <div class="kpi"><div class="kpi-label">WAF Signature</div><div class="kpi-val sm warn">v4.2.1</div></div>
+        <div class="kpi"><div class="kpi-label">TX Remaining</div><div class="kpi-val danger">@@TX_REMAINING@@</div></div>
+        <div class="kpi"><div class="kpi-label">Bypass Threshold</div><div class="kpi-val accent">@@BALANCE_THRESHOLD@@</div></div>
+        <div class="kpi"><div class="kpi-label">Detection Risk</div><div class="kpi-val danger">94.2%</div></div>
+        <div class="kpi"><div class="kpi-label">Withdrawal Pipe</div><div class="kpi-val warn">HOLD</div></div>
+    </div>
+    <div class="kpi-sub">
+        <div class="item"><span>MC Sim Runs</span><strong>50,000</strong></div>
+        <div class="item"><span>Bypass Readiness</span><strong>62.0%</strong></div>
+        <div class="item"><span>Shield Integrity</span><strong>97.3%</strong></div>
+        <div class="item"><span>Geo Scope</span><strong>US-NODES</strong></div>
+    </div>
+    <div class="body-grid">
+        <div class="sidebar">
+            <div class="sidebar-title">Operation Timeline</div>
+            <div class="timeline-item"><div class="t">T-0</div>Protection daemon started · integrity PASSED</div>
+            <div class="timeline-item"><div class="t">T+1</div>Penetration audit trail loaded</div>
+            <div class="timeline-item"><div class="t">T+2</div>Internal network topology enumerated</div>
+            <div class="timeline-item"><div class="t">T+3</div>Privilege escalation · admin rights obtained</div>
+            <div class="timeline-item"><div class="t">T+4</div>Lateral movement · hosts .20/.21/.25 controlled</div>
+            <div class="timeline-item"><div class="t">T+5</div>Core database accessed · tx logs extracted</div>
+            <div class="timeline-item active"><div class="t">T+6</div>WAF upgrade detected · operator advisory issued</div>
+            <div class="module-list">
+                <div class="sidebar-title">Modules Deployed</div>
+                <div class="module-item">Risk Engine v4.1</div>
+                <div class="module-item">WAF Predictor</div>
+                <div class="module-item">Bypass Calculator</div>
+                <div class="module-item">Session Guard</div>
+                <div class="module-item">Egress Filter US-NODES</div>
+            </div>
+            <div class="sidebar-extra">
+                <div class="status-box">
+                    <div class="sidebar-title">Operational Status</div>
+                    <div class="status-row"><span>Penetration</span><strong class="ok">COMPLETE</strong></div>
+                    <div class="status-row"><span>WAF Layer</span><strong class="warn">UPGRADED</strong></div>
+                    <div class="status-row"><span>Safe TX Window</span><strong class="danger">@@TX_REMAINING@@ cycles</strong></div>
+                    <div class="status-row"><span>Recovery Proj.</span><strong class="ok">100%</strong></div>
+                </div>
+                <div class="seal-box">
+                    <div class="label">Evidence Seal</div>
+                    Packet <span class="hash-line">@@EVIDENCE_ID@@</span><br>
+                    SHA-256 <span class="hash-line">@@SHA_SEAL@@</span>
+                </div>
+            </div>
+        </div>
+        <div class="main">
+            <div class="assessment">
+                <strong>Intelligence Assessment.</strong>
+                Target has upgraded perimeter firewall to signature <strong>v4.2.1</strong>.
+                Session <span class="hl">@@SESSION_ID@@</span> · Evidence packet
+                <span class="hl">@@EVIDENCE_ID@@</span>.
+                Monte-Carlo exposure model (50,000 iterations) confirms
+                <strong>94.2%</strong> detection probability beyond authorized transaction limit.
+                Bypass equation solved: balance &ge; <strong>@@BALANCE_THRESHOLD@@</strong>
+                satisfies WAF gate clearance for remaining <strong>@@TX_REMAINING@@</strong> cycles.
+            </div>
+            <div class="alert-panel">
+                <div class="alert-title">SYSTEM WARNING — @@TX_REMAINING@@ transaction windows remain before lockout</div>
+                <div class="alert-sub">Target has upgraded perimeter firewall.<br>Further transfers beyond this limit carry extremely high detection probability and immediate session termination.</div>
+                <div class="alert-calc">COMPUTED BYPASS: Account balance reaching <strong>@@BALANCE_THRESHOLD@@</strong> will satisfy WAF threshold<br>and allow firewall bypass to complete the remaining <strong>@@TX_REMAINING@@ transactions</strong>.</div>
+                <div class="alert-highlight">WITHDRAWAL STATUS: Outbound transfers temporarily blocked by new WAF policy.<br>After @@TX_REMAINING@@ authorized cycles, bypass payload will breach firewall<br>and enable full withdrawal — projected <strong>100% fund recovery</strong>.</div>
+            </div>
+            <div class="meter-grid">
+                <div class="meter-row"><span>Detection Risk</span><div class="meter-bar"><div class="meter-fill red" style="width:94%"></div></div><span class="meter-val">94.2%</span></div>
+                <div class="meter-row"><span>Bypass Readiness</span><div class="meter-bar"><div class="meter-fill amber" style="width:62%"></div></div><span class="meter-val">62.0%</span></div>
+                <div class="meter-row"><span>Shield Integrity</span><div class="meter-bar"><div class="meter-fill green" style="width:97%"></div></div><span class="meter-val">97.3%</span></div>
+            </div>
+            <div class="log-box">
+                <div class="log-title">Calc Engine Output</div>
+                <div class="log-line">WAF ruleset fingerprint: <span class="hl">8f2a9c1e4b7d3065</span></div>
+                <div class="log-line">Monte-Carlo model: <strong>50,000 iterations</strong> · CI 97.3%</div>
+                <div class="log-line">Detection curve: P(discovery|tx&gt;2) = <strong>0.942</strong> · lockout threshold confirmed</div>
+                <div class="log-line">Bypass gate: balance &ge; <strong>@@BALANCE_THRESHOLD@@</strong> → WAF clearance</div>
+                <div class="log-line">TX budget remaining: <strong>@@TX_REMAINING@@</strong> cycles · withdrawal pipe HOLD</div>
+            </div>
+            <div class="ttp-box">
+                <div class="ttp-title">Observed TTPs (Tactics, Techniques, Procedures)</div>
+                <div class="ttp-text">
+                    Perimeter WAF heuristic upgrade blocking prior bypass vectors;
+                    lateral movement across internal subnet before database extraction;
+                    transaction hash cross-reference with US jurisdiction pivot sources;
+                    controlled egress via <strong>@@TX_REMAINING@@</strong>-cycle bypass window
+                    before full withdrawal pipe unlock at <strong>@@BALANCE_THRESHOLD@@</strong> threshold.
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        CLASSIFICATION: RESTRICTED · NullShield Intelligence Division · Evidence hash SHA-256:@@SHA_SEAL@@ · NOT FOR PUBLIC RELEASE
+    </div>
+</div>
+</body>
+</html>

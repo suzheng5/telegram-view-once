@@ -9,13 +9,28 @@ block_cipher = None
 
 ROOT = os.path.dirname(os.path.abspath(SPEC))
 DIST = os.path.join(ROOT, "dist")
-EXE_NAME = "TelegramViewOnce_1"
+EXE_NAME = "TelegramViewOnce_2"
 ICON = os.path.join(ROOT, "icon.ico")
 
 _datas = []
 _binaries = []
 _hiddenimports = [
     "tg_service",
+    "services",
+    "services.contact_name",
+    "services.score",
+    "services.contact_backup",
+    "ui",
+    "ui.score_page",
+    "ui.score_model",
+    "ui.score_delegates",
+    "ui.nullshield_page",
+    "nullshield",
+    "nullshield.paths",
+    "nullshield.config_store",
+    "nullshield.html_render",
+    "nullshield.page_builder",
+    "nullshield.html_capture",
     "qrcode",
     "qrcode.image.pil",
     "PIL",
@@ -32,6 +47,12 @@ _hiddenimports = [
 _hiddenimports += collect_submodules("telethon")
 _datas += collect_data_files("certifi")
 _datas.append((os.path.join(ROOT, "icon.ico"), "."))
+_templates = os.path.join(ROOT, "templates")
+if os.path.isdir(_templates):
+    for _name in os.listdir(_templates):
+        _src = os.path.join(_templates, _name)
+        if os.path.isfile(_src):
+            _datas.append((_src, "templates"))
 
 try:
     import PySide6

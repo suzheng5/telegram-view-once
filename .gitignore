@@ -4,6 +4,9 @@ __pycache__/
 *.session
 *.session-journal
 config.json
+display_config.json
+output/
+data/
 sessions/
 backup/
 build/

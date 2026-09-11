@@ -15,6 +15,8 @@ from typing import Any, Callable
 from telethon import TelegramClient, functions, types, utils
 from telethon.tl.types import User
 
+from services.contact_name import parse_contact_name, split_contact_name
+
 
 def _app_dir() -> Path:
     if getattr(sys, "frozen", False):
@@ -185,6 +187,59 @@ class TelegramService:
                 }
             )
         return chats
+
+    @staticmethod
+    def _saved_name(user: User) -> str:
+        parts = [p for p in (user.first_name or "", user.last_name or "") if p]
+        return " ".join(parts).strip() or (utils.get_display_name(user) or "")
+
+    def _score_row(self, user: User, display_name: str) -> dict[str, Any] | None:
+        parsed = parse_contact_name(display_name)
+        if not parsed:
+            return None
+        username = f"@{user.username}" if user.username else ""
+        return {
+            "id": user.id,
+            "name": parsed.name,
+            "uid": parsed.uid,
+            "amount": str(parsed.amount),
+            "rate": str(parsed.rate),
+            "username": username,
+            "phone": user.phone or "",
+            "raw_name": display_name.strip(),
+        }
+
+    async def list_score_contacts(self) -> list[dict[str, Any]]:
+        assert self.client
+        rows: list[dict[str, Any]] = []
+        try:
+            result = await self.client(functions.contacts.GetContactsRequest(hash=0))
+            users = getattr(result, "users", None) or []
+        except Exception:
+            return rows
+        for user in users:
+            if not isinstance(user, User) or user.bot or user.deleted or user.is_self:
+                continue
+            row = self._score_row(user, self._saved_name(user))
+            if row:
+                rows.append(row)
+        return rows
+
+    async def update_contact_name(self, user_id: int, display_name: str) -> None:
+        assert self.client
+        peer = await self.client.get_input_entity(user_id)
+        entity = await self.client.get_entity(user_id)
+        phone = getattr(entity, "phone", None) or ""
+        first, last = split_contact_name(display_name)
+        await self.client(
+            functions.contacts.AddContactRequest(
+                id=peer,
+                first_name=first,
+                last_name=last,
+                phone=phone,
+                add_phone_privacy_exception=False,
+            )
+        )
 
     async def avatar_bytes(self, user_id: int) -> bytes | None:
         assert self.client

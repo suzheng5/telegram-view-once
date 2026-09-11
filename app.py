@@ -1,5 +1,5 @@
 """
-Telegram 阅后即焚 — Soft Carbon（PySide6 Model/View）
+导师小帮手 — 上分 + 阅后即焚（PySide6 Model/View）
 """
 
 from __future__ import annotations
@@ -56,6 +56,7 @@ try:
         QSplitter,
         QStackedWidget,
         QStyle,
+        QTabWidget,
         QStyledItemDelegate,
         QStyleOptionViewItem,
         QVBoxLayout,
@@ -66,6 +67,9 @@ except ImportError:
     print("缺少依赖，请双击 run.bat 或执行：python -m pip install -r requirements.txt")
     sys.exit(1)
 
+from services.contact_backup import ContactBackup
+from services.contact_name import format_contact_name
+from services.score import ScoreStore, local_now, money, next_amount
 from tg_service import (
     APP_DIR,
     IMAGE_EXTS,
@@ -76,8 +80,12 @@ from tg_service import (
     load_config,
     save_config,
 )
+from ui.nullshield_page import NullShieldPage
+from ui.score_page import ScorePage
 
-APP_VERSION = "v1.0"
+APP_NAME = "导师小帮手"
+APP_VERSION = "v1.1"
+SEND_TAB = 2
 
 BG = "#12151c"
 PANEL = "#1b2030"
@@ -180,6 +188,61 @@ QLabel#badge {{
     color: {ACCENT};
     border-radius: 6px;
     padding: 2px 8px;
+}}
+QTabWidget#mainTabs::pane {{
+    border: none;
+    background: transparent;
+}}
+QTabBar::tab {{
+    background: {INPUT};
+    color: {TEXT_DIM};
+    padding: 8px 22px;
+    margin-right: 4px;
+    border: 1px solid {BORDER};
+    border-bottom: none;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}}
+QTabBar::tab:selected {{
+    background: {PANEL};
+    color: {ACCENT};
+    font-weight: 700;
+}}
+QTableView {{
+    background: transparent;
+    border: none;
+    outline: none;
+    gridline-color: {BORDER};
+    selection-background-color: {SELECTED};
+    alternate-background-color: #161a24;
+    color: {TEXT};
+}}
+QHeaderView::section {{
+    background: {PANEL};
+    color: {TEXT_DIM};
+    border: none;
+    border-bottom: 1px solid {BORDER};
+    padding: 8px 6px;
+    font-weight: 600;
+}}
+QGroupBox {{
+    background: {PANEL};
+    border: 1px solid {BORDER};
+    border-radius: 12px;
+    margin-top: 12px;
+    padding: 12px 10px 10px 10px;
+    font-weight: 600;
+    color: {ACCENT};
+}}
+QGroupBox::title {{
+    subcontrol-origin: margin;
+    left: 12px;
+    padding: 0 6px;
+    color: {ACCENT};
+}}
+QScrollArea {{
+    border: none;
+    background: transparent;
 }}
 """
 
@@ -336,7 +399,7 @@ class ChatDelegate(QStyledItemDelegate):
 class MainWindow(QWidget):
     def __init__(self) -> None:
         super().__init__()
-        self.setWindowTitle(f"阅后即焚 {APP_VERSION}")
+        self.setWindowTitle(f"{APP_NAME} {APP_VERSION}")
         self.resize(1180, 760)
         self.setMinimumSize(960, 640)
         icon = _window_icon()
@@ -359,7 +422,10 @@ class MainWindow(QWidget):
         self._login_busy = False
         self._avatar_done: set[int] = set()
         self._avatar_inflight: set[int] = set()
+        self._avatar_bytes: dict[int, bytes] = {}
         self._switch_back_id: int | None = None
+        self.score_store = ScoreStore(APP_DIR)
+        self.contact_backup = ContactBackup(APP_DIR)
 
         self.model = ChatListModel()
         self._build()
@@ -445,7 +511,7 @@ class MainWindow(QWidget):
         title.setObjectName("title")
         inner.addWidget(title)
         hint = QLabel(
-            "电脑官方客户端不能发阅后即焚。本工具用你自己的账号、通过官方 API 发送。\n"
+            "用你自己的 Telegram 账号登录：上分改通讯录备注，发图走阅后即焚。\n"
             "1. 浏览器打开  https://my.telegram.org/apps\n"
             "2. 用本机 Telegram 手机号登录（不是机器人 Token）\n"
             "3. 创建一个应用，把 api_id 和 api_hash 填到下面"
@@ -554,7 +620,7 @@ class MainWindow(QWidget):
         tl.setContentsMargins(18, 8, 18, 8)
         mark = QLabel("●")
         mark.setStyleSheet(f"color:{ACCENT}; font-size:18px;")
-        title = QLabel("阅后即焚")
+        title = QLabel(APP_NAME)
         title.setObjectName("h")
         self.conn_label = QLabel("已连接")
         self.conn_label.setObjectName("ok")
@@ -656,7 +722,19 @@ class MainWindow(QWidget):
         wrap = QWidget()
         wrap.setLayout(body)
         body.addWidget(split)
-        col.addWidget(wrap, 1)
+
+        self.score_page = ScorePage()
+        self.score_page.increase_requested.connect(self._on_score_increase)
+        self.score_page.need_avatars.connect(self._on_score_need_avatars)
+        self.display_page = NullShieldPage()
+        self.display_page.image_ready.connect(self._on_display_image)
+
+        self.main_tabs = QTabWidget()
+        self.main_tabs.setObjectName("mainTabs")
+        self.main_tabs.addTab(self.score_page, "上分")
+        self.main_tabs.addTab(self.display_page, "展示")
+        self.main_tabs.addTab(wrap, "发图")
+        col.addWidget(self.main_tabs, 1)
         return page
 
     def _show(self, name: str) -> None:
@@ -788,10 +866,12 @@ class MainWindow(QWidget):
         self.selected = None
         self._avatar_done.clear()
         self._avatar_inflight.clear()
+        self._avatar_bytes.clear()
         self.model.set_chats([])
         self.chat_view.clearSelection()
         self.target_label.setText("请在左侧选择一位联系人")
         self.target_label.setStyleSheet(f"color:{TEXT_DIM};")
+        self.score_page.reset()
 
     def _enter_main(self) -> None:
         self.service.cancel_qr()
@@ -804,14 +884,17 @@ class MainWindow(QWidget):
             try:
                 me = self.runner.submit(self.service.me()).result()
                 chats = self.runner.submit(self.service.list_private_chats()).result()
+                scores = self.runner.submit(self.service.list_score_contacts()).result()
             except Exception as exc:
                 self.call(lambda: self._set_main_status(f"加载失败：{exc}", DANGER))
                 return
-            self.call(lambda: self._fill_main(me, chats))
+            self.call(lambda: self._fill_main(me, chats, scores))
 
         self._thread(work)
 
-    def _fill_main(self, me: dict[str, Any], chats: list[dict[str, Any]]) -> None:
+    def _fill_main(
+        self, me: dict[str, Any], chats: list[dict[str, Any]], scores: list[dict[str, Any]]
+    ) -> None:
         who = me["name"] + (f"  {me['username']}" if me["username"] else "")
         self.me_label.setText(who)
         self._rebuild_accounts()
@@ -819,8 +902,16 @@ class MainWindow(QWidget):
         self.target_label.setText("请在左侧选择一位联系人")
         self._avatar_done.clear()
         self._avatar_inflight.clear()
+        self._avatar_bytes.clear()
         self.model.set_chats(chats)
-        self._set_main_status(f"已加载 {len(chats)} 个私聊", SUCCESS)
+        self.score_page.set_contacts(scores, self.score_store, int(me["id"]))
+        self._apply_saved_avatars(int(me["id"]))
+        saved = self._backup_contacts(int(me["id"]))
+        self._set_main_status(f"已加载 {len(chats)} 个私聊，上分 {len(scores)} 人", SUCCESS)
+        if saved:
+            self.score_page.set_status(
+                f"可上分 {len(scores)} 人，本地已备份 {saved} 人", SUCCESS
+            )
         QTimer.singleShot(80, self._load_visible_avatars)
 
     def _schedule_avatars(self, *_args) -> None:
@@ -865,8 +956,113 @@ class MainWindow(QWidget):
         self._thread(work)
 
     def _set_avatar(self, uid: int, data: bytes) -> None:
+        self._avatar_bytes[uid] = data
         self.model.set_avatar(uid, data)
+        self.score_page.set_avatar(uid, data)
         self._avatar_done.add(uid)
+        account_id = self._active_account_id()
+        if account_id:
+            try:
+                self.contact_backup.save_avatar(account_id, uid, data)
+            except OSError:
+                pass
+
+    def _active_account_id(self) -> int | None:
+        if getattr(self, "score_page", None) is not None and self.score_page.account_id:
+            return int(self.score_page.account_id)
+        raw = self.config_data.get("active_id")
+        return int(raw) if raw else None
+
+    def _apply_saved_avatars(self, account_id: int) -> None:
+        try:
+            blobs = self.contact_backup.load_avatars(account_id)
+        except OSError:
+            return
+        for uid, data in blobs.items():
+            self._avatar_bytes.setdefault(uid, data)
+            self.model.set_avatar(uid, data)
+            self.score_page.set_avatar(uid, data)
+
+    def _backup_contacts(self, account_id: int | None = None) -> int:
+        aid = account_id or self._active_account_id()
+        if not aid or not getattr(self, "score_page", None):
+            return 0
+        try:
+            return self.contact_backup.save(aid, self.score_page.backup_rows())
+        except OSError:
+            return 0
+
+    def _on_score_need_avatars(self, ids: list[int]) -> None:
+        for uid in ids:
+            cached = self._avatar_bytes.get(uid)
+            if cached:
+                self.score_page.set_avatar(uid, cached)
+        needed = [
+            uid
+            for uid in ids
+            if uid not in self._avatar_done and uid not in self._avatar_inflight
+        ]
+        if not needed:
+            return
+        for uid in needed:
+            self._avatar_inflight.add(uid)
+
+        def on_one(uid: int, data: bytes) -> None:
+            self.call(lambda u=uid, d=data: self._set_avatar(u, d))
+
+        def work(batch=list(needed)):
+            try:
+                self.runner.submit(self.service.fetch_avatars(batch, on_one)).result()
+            except Exception:
+                pass
+            for uid in batch:
+                self._avatar_inflight.discard(uid)
+                self._avatar_done.add(uid)
+
+        self._thread(work)
+
+    def _on_score_increase(self, item: Any) -> None:
+        def work():
+            try:
+                bump, new_amount = next_amount(item.amount_decimal, item.rate_decimal)
+                new_name = format_contact_name(
+                    item.name, item.uid, new_amount, item.rate_decimal
+                )
+                self.runner.submit(
+                    self.service.update_contact_name(item.user_id, new_name)
+                ).result()
+            except Exception as exc:
+                err = str(exc)
+                self.call(
+                    lambda e=err, uid=item.user_id: self.score_page.fail_increase(
+                        uid, f"上分失败：{e}"
+                    )
+                )
+                return
+            when = local_now().isoformat(timespec="seconds")
+            increase_text = money(bump)
+            current_text = money(new_amount)
+            self.call(
+                lambda name=new_name: self._after_score_increase(
+                    item, new_amount, when, increase_text, current_text, name
+                )
+            )
+
+        self._thread(work)
+
+    def _after_score_increase(
+        self,
+        item: Any,
+        new_amount,
+        when: str,
+        increase_text: str,
+        current_text: str,
+        raw_name: str = "",
+    ) -> None:
+        self.score_page.apply_increase(item.user_id, new_amount, when, raw_name)
+        self.score_page.set_status(
+            f"{item.name} 已增加 {increase_text}，当前 {current_text}", SUCCESS
+        )
 
     def _start_qr(self) -> None:
         self._set_qr_status("请用手机 Telegram 扫描二维码", TEXT_DIM)
@@ -1033,21 +1229,37 @@ class MainWindow(QWidget):
         def work():
             try:
                 chats = self.runner.submit(self.service.list_private_chats()).result()
+                scores = self.runner.submit(self.service.list_score_contacts()).result()
             except Exception as exc:
                 self.call(lambda: self._set_main_status(f"刷新失败：{exc}", DANGER))
                 return
-            self.call(lambda: self._after_reload(chats))
+            self.call(lambda: self._after_reload(chats, scores))
 
         self._thread(work)
 
-    def _after_reload(self, chats: list[dict[str, Any]]) -> None:
+    def _after_reload(
+        self, chats: list[dict[str, Any]], scores: list[dict[str, Any]]
+    ) -> None:
         self.model.set_chats(chats)
         self._avatar_done.clear()
         self._avatar_inflight.clear()
-        self._set_main_status(f"已刷新，共 {len(chats)} 个私聊", SUCCESS)
+        self._avatar_bytes.clear()
+        account_id = int(self.config_data.get("active_id") or 0)
+        if account_id:
+            self.score_page.set_contacts(scores, self.score_store, account_id)
+            self._apply_saved_avatars(account_id)
+            saved = self._backup_contacts(account_id)
+            if saved:
+                self.score_page.set_status(
+                    f"可上分 {len(scores)} 人，本地已备份 {saved} 人", SUCCESS
+                )
+        self._set_main_status(
+            f"已刷新，私聊 {len(chats)}，上分 {len(scores)} 人", SUCCESS
+        )
         self._schedule_avatars()
 
     def _add_account(self) -> None:
+        self._backup_contacts()
         self._switch_back_id = self.config_data.get("active_id")
         self._need_2fa = False
         self._login_busy = False
@@ -1070,6 +1282,7 @@ class MainWindow(QWidget):
         acc = next((a for a in self._accounts() if int(a["id"]) == int(user_id)), None)
         if not acc:
             return
+        self._backup_contacts()
         self._reset_chat_list()
         self._clear_image()
         self.me_label.setText(self._account_label(acc))
@@ -1100,12 +1313,12 @@ class MainWindow(QWidget):
         w = QApplication.focusWidget()
         if isinstance(w, QLineEdit):
             return
-        if self.stack.currentIndex() != 2:
+        if self.stack.currentIndex() != 2 or self.main_tabs.currentIndex() != SEND_TAB:
             return
         self._paste_image()
 
     def _paste_image(self) -> None:
-        if self.stack.currentIndex() != 2:
+        if self.stack.currentIndex() != 2 or self.main_tabs.currentIndex() != SEND_TAB:
             return
         clip = QGuiApplication.clipboard()
         qimg = clip.image()
@@ -1140,6 +1353,11 @@ class MainWindow(QWidget):
                 self._load_image_path(files[0])
                 return
         self._set_main_status("剪贴板里没有图片，请先复制图片或截图", DANGER)
+
+    def _on_display_image(self, path: str) -> None:
+        self._load_image_path(Path(path))
+        self.main_tabs.setCurrentIndex(SEND_TAB)
+        self._set_main_status("已载入展示页图片，选联系人后可发阅后即焚", SUCCESS)
 
     def _load_image_path(self, path: Path) -> None:
         pix = QPixmap(str(path))
@@ -1241,6 +1459,7 @@ class MainWindow(QWidget):
             != QMessageBox.Yes
         ):
             return
+        self._backup_contacts()
         current_id = self.config_data.get("active_id")
         self._set_main_status("正在退出…", TEXT_DIM)
 
@@ -1271,6 +1490,10 @@ class MainWindow(QWidget):
 
     def closeEvent(self, event) -> None:  # noqa: N802
         try:
+            self._backup_contacts()
+        except Exception:
+            pass
+        try:
             self.service.cancel_qr()
             self.runner.submit(self.service.disconnect())
         except Exception:
@@ -1288,7 +1511,7 @@ class MainWindow(QWidget):
 
 def main() -> None:
     app = QApplication(sys.argv)
-    app.setApplicationName("阅后即焚")
+    app.setApplicationName(APP_NAME)
     icon = _window_icon()
     if icon:
         app.setWindowIcon(icon)
