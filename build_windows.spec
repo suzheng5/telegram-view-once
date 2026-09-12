@@ -9,7 +9,7 @@ block_cipher = None
 
 ROOT = os.path.dirname(os.path.abspath(SPEC))
 DIST = os.path.join(ROOT, "dist")
-EXE_NAME = "TelegramViewOnce_2"
+EXE_NAME = "TelegramViewOnce_3"
 ICON = os.path.join(ROOT, "icon.ico")
 
 _datas = []

@@ -209,6 +209,14 @@ class TelegramService:
             "raw_name": display_name.strip(),
         }
 
+    @staticmethod
+    def sort_scores_like_chats(
+        scores: list[dict[str, Any]], chats: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
+        rank = {int(chat["id"]): i for i, chat in enumerate(chats)}
+        last = len(rank)
+        return sorted(scores, key=lambda row: rank.get(int(row["id"]), last))
+
     async def list_score_contacts(self) -> list[dict[str, Any]]:
         assert self.client
         rows: list[dict[str, Any]] = []

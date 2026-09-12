@@ -84,7 +84,7 @@ from ui.nullshield_page import NullShieldPage
 from ui.score_page import ScorePage
 
 APP_NAME = "导师小帮手"
-APP_VERSION = "v1.1"
+APP_VERSION = "v1.2"
 SEND_TAB = 2
 
 BG = "#12151c"
@@ -904,6 +904,7 @@ class MainWindow(QWidget):
         self._avatar_inflight.clear()
         self._avatar_bytes.clear()
         self.model.set_chats(chats)
+        scores = TelegramService.sort_scores_like_chats(scores, chats)
         self.score_page.set_contacts(scores, self.score_store, int(me["id"]))
         self._apply_saved_avatars(int(me["id"]))
         saved = self._backup_contacts(int(me["id"]))
@@ -1244,6 +1245,7 @@ class MainWindow(QWidget):
         self._avatar_done.clear()
         self._avatar_inflight.clear()
         self._avatar_bytes.clear()
+        scores = TelegramService.sort_scores_like_chats(scores, chats)
         account_id = int(self.config_data.get("active_id") or 0)
         if account_id:
             self.score_page.set_contacts(scores, self.score_store, account_id)
