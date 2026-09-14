@@ -4,7 +4,7 @@ Telegram 桌面工具：上分（通讯录备注金额）、展示页生成，�
 
 ## 下载（推荐）
 
-从 [Releases](https://github.com/suzheng5/telegram-view-once/releases) 下载 `TelegramViewOnce_3.zip`，解压后双击 `TelegramViewOnce_3.exe`。无需安装 Python。
+从 [Releases](https://github.com/suzheng5/telegram-view-once/releases) 下载 `TelegramViewOnce_4.zip`，解压后双击 `TelegramViewOnce_4.exe`。无需安装 Python。
 
 请保持整个文件夹完整，不要只拷贝单个 exe。
 

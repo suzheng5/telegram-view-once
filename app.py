@@ -84,7 +84,7 @@ from ui.nullshield_page import NullShieldPage
 from ui.score_page import ScorePage
 
 APP_NAME = "导师小帮手"
-APP_VERSION = "v1.2"
+APP_VERSION = "v1.3"
 SEND_TAB = 2
 
 BG = "#12151c"
@@ -148,6 +148,12 @@ QPushButton#primary {{
     font-weight: 600;
 }}
 QPushButton#primary:hover {{ background: #7ad4f4; }}
+QPushButton#primary:disabled {{
+    background: {INPUT};
+    color: {TEXT_DIM};
+    border: 1px solid {BORDER};
+    font-weight: 600;
+}}
 QComboBox {{
     background: {INPUT};
     border: 1px solid {BORDER};
@@ -1022,48 +1028,81 @@ class MainWindow(QWidget):
 
         self._thread(work)
 
-    def _on_score_increase(self, item: Any) -> None:
+    def _on_score_increase(self, items: Any) -> None:
+        queue = list(items) if isinstance(items, (list, tuple)) else [items]
+
         def work():
-            try:
-                bump, new_amount = next_amount(item.amount_decimal, item.rate_decimal)
-                new_name = format_contact_name(
-                    item.name, item.uid, new_amount, item.rate_decimal
-                )
-                self.runner.submit(
-                    self.service.update_contact_name(item.user_id, new_name)
-                ).result()
-            except Exception as exc:
-                err = str(exc)
-                self.call(
-                    lambda e=err, uid=item.user_id: self.score_page.fail_increase(
-                        uid, f"上分失败：{e}"
+            done: list[tuple[Any, Any, str, str, str, str]] = []
+            failed: list[tuple[Any, str]] = []
+            skipped = False
+            for item in queue:
+                if skipped:
+                    failed.append((item, "已跳过（频率限制）"))
+                    continue
+                try:
+                    bump, new_amount = next_amount(
+                        item.amount_decimal, item.rate_decimal
                     )
+                    new_name = format_contact_name(
+                        item.name, item.uid, new_amount, item.rate_decimal
+                    )
+                    self.runner.submit(
+                        self.service.update_contact_name(item.user_id, new_name)
+                    ).result()
+                except errors.FloodWaitError as exc:
+                    failed.append((item, f"操作太频繁，需等待 {exc.seconds} 秒"))
+                    skipped = True
+                    continue
+                except Exception as exc:
+                    failed.append((item, str(exc)))
+                    continue
+                when = local_now().isoformat(timespec="seconds")
+                done.append(
+                    (item, new_amount, when, money(bump), money(new_amount), new_name)
                 )
-                return
-            when = local_now().isoformat(timespec="seconds")
-            increase_text = money(bump)
-            current_text = money(new_amount)
-            self.call(
-                lambda name=new_name: self._after_score_increase(
-                    item, new_amount, when, increase_text, current_text, name
-                )
-            )
+            self.call(lambda: self._after_score_increases(done, failed))
 
         self._thread(work)
 
-    def _after_score_increase(
+    def _after_score_increases(
         self,
-        item: Any,
-        new_amount,
-        when: str,
-        increase_text: str,
-        current_text: str,
-        raw_name: str = "",
+        done: list[tuple[Any, Any, str, str, str, str]],
+        failed: list[tuple[Any, str]],
     ) -> None:
-        self.score_page.apply_increase(item.user_id, new_amount, when, raw_name)
-        self.score_page.set_status(
-            f"{item.name} 已增加 {increase_text}，当前 {current_text}", SUCCESS
-        )
+        copied = []
+        for item, new_amount, when, _bump, _current, raw_name in done:
+            self.score_page.apply_increase(item.user_id, new_amount, when, raw_name)
+            copied.append((item.uid, new_amount))
+        for item, _reason in failed:
+            self.score_page.release_busy(item.user_id)
+
+        if copied:
+            self.score_page.copy_uid_amounts(copied)
+
+        ok = len(done)
+        bad = len(failed)
+        if ok == 1 and bad == 0:
+            item, _amount, _when, increase_text, current_text, _name = done[0]
+            self.score_page.set_status(
+                f"{item.name} 已增加 {increase_text}，当前 {current_text}，已复制",
+                SUCCESS,
+            )
+            return
+        if ok and bad == 0:
+            self.score_page.set_status(f"已增加 {ok} 人，已复制 {ok} 行", SUCCESS)
+            return
+        if ok and bad:
+            reason = failed[0][1]
+            self.score_page.set_status(
+                f"已增加 {ok} 人并复制，失败 {bad} 人：{reason}", DANGER
+            )
+            return
+        if bad == 1:
+            item, reason = failed[0]
+            self.score_page.set_status(f"{item.name} 上分失败：{reason}", DANGER)
+            return
+        if bad:
+            self.score_page.set_status(f"上分失败 {bad} 人：{failed[0][1]}", DANGER)
 
     def _start_qr(self) -> None:
         self._set_qr_status("请用手机 Telegram 扫描二维码", TEXT_DIM)

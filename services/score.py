@@ -29,6 +29,14 @@ def plain_amount(value: Decimal) -> str:
     return f"{value.quantize(MONEY_STEP, rounding=ROUND_HALF_UP):.0f}"
 
 
+def uid_amount_line(uid: str, amount: Decimal) -> str:
+    return f"{uid} {plain_amount(amount)}"
+
+
+def uid_amount_block(pairs: list[tuple[str, Decimal]]) -> str:
+    return "\n".join(uid_amount_line(uid, amount) for uid, amount in pairs)
+
+
 def money(value: Decimal) -> str:
     return f"{value.quantize(MONEY_STEP, rounding=ROUND_HALF_UP):,.0f}"
 

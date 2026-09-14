@@ -11,13 +11,14 @@ from PySide6.QtWidgets import (
     QHeaderView,
     QLabel,
     QLineEdit,
+    QPushButton,
     QTableView,
     QVBoxLayout,
     QWidget,
 )
 
 from services.contact_name import format_contact_name
-from services.score import ScoreStore, percent, plain_amount
+from services.score import ScoreStore, percent, plain_amount, uid_amount_block, uid_amount_line
 from ui.score_delegates import ScoreActionDelegate, ScoreAvatarDelegate
 from ui.score_model import ScoreContact, ScoreFilterModel, ScoreModel
 
@@ -27,7 +28,7 @@ DANGER = "#fb7185"
 
 
 class ScorePage(QWidget):
-    increase_requested = Signal(object)
+    increase_requested = Signal(list)
     need_avatars = Signal(list)
 
     def __init__(self, parent: QWidget | None = None) -> None:
@@ -44,7 +45,7 @@ class ScorePage(QWidget):
         self.table.setModel(self.proxy)
         self.table.setAlternatingRowColors(True)
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
-        self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.setSortingEnabled(False)
         self.table.horizontalHeader().setSortIndicatorShown(False)
@@ -69,6 +70,7 @@ class ScorePage(QWidget):
         self.action_delegate.increase_requested.connect(self._on_increase)
         self.action_delegate.copy_requested.connect(self._on_copy)
         self.table.verticalScrollBar().valueChanged.connect(self._emit_visible_avatars)
+        self.table.selectionModel().selectionChanged.connect(self._refresh_count)
 
         search = QLineEdit()
         search.setPlaceholderText("搜索名字或 UID")
@@ -81,10 +83,16 @@ class ScorePage(QWidget):
         title.setObjectName("h")
         self.count_label = QLabel()
         self.count_label.setObjectName("hint")
+        self.batch_btn = QPushButton("增加所选")
+        self.batch_btn.setObjectName("primary")
+        self.batch_btn.setEnabled(False)
+        self.batch_btn.setToolTip("Ctrl 点选多个，Shift 连选，再一起上分")
+        self.batch_btn.clicked.connect(self._on_increase_selected)
         tools = QHBoxLayout()
         tools.addWidget(title)
         tools.addWidget(self.count_label)
         tools.addStretch()
+        tools.addWidget(self.batch_btn)
         tools.addWidget(search)
 
         self.empty_label = QLabel(
@@ -161,6 +169,16 @@ class ScorePage(QWidget):
         self.model.apply_increase(user_id, new_amount, when, raw_name)
         if self.store and self.account_id is not None:
             self.store.mark(self.account_id, user_id, when)
+        self._refresh_batch_btn()
+
+    def release_busy(self, user_id: int) -> None:
+        self._busy.discard(user_id)
+        self._refresh_batch_btn()
+
+    def copy_uid_amounts(self, pairs: list[tuple[str, Any]]) -> None:
+        text = uid_amount_block([(uid, amount) for uid, amount in pairs])
+        if text:
+            QApplication.clipboard().setText(text)
 
     def backup_rows(self) -> list[dict[str, Any]]:
         rows: list[dict[str, Any]] = []
@@ -185,7 +203,7 @@ class ScorePage(QWidget):
         return rows
 
     def fail_increase(self, user_id: int, message: str) -> None:
-        self._busy.discard(user_id)
+        self.release_busy(user_id)
         self.set_status(message, DANGER)
 
     def _contact_from_proxy(self, proxy_index: QModelIndex) -> ScoreContact | None:
@@ -194,28 +212,68 @@ class ScorePage(QWidget):
             return None
         return self.model.contact_at(source.row())
 
+    def _selected_contacts(self) -> list[ScoreContact]:
+        selection = self.table.selectionModel()
+        if selection is None:
+            return []
+        items: list[ScoreContact] = []
+        seen: set[int] = set()
+        for index in sorted(selection.selectedRows(), key=lambda row: row.row()):
+            item = self._contact_from_proxy(index)
+            if item and item.user_id not in seen:
+                seen.add(item.user_id)
+                items.append(item)
+        return items
+
+    def _request_increase(self, items: list[ScoreContact]) -> None:
+        ready = [item for item in items if item.user_id not in self._busy]
+        if not ready:
+            return
+        for item in ready:
+            self._busy.add(item.user_id)
+        self._refresh_batch_btn()
+        if len(ready) == 1:
+            self.set_status(f"正在为 {ready[0].name} 上分…", TEXT_DIM)
+        else:
+            self.set_status(f"正在为 {len(ready)} 人上分…", TEXT_DIM)
+        self.increase_requested.emit(ready)
+
     def _on_increase(self, proxy_index: QModelIndex) -> None:
         item = self._contact_from_proxy(proxy_index)
-        if not item or item.user_id in self._busy:
+        if not item:
             return
-        self._busy.add(item.user_id)
-        self.set_status(f"正在为 {item.name} 上分…", TEXT_DIM)
-        self.increase_requested.emit(item)
+        self._request_increase([item])
+
+    def _on_increase_selected(self) -> None:
+        items = self._selected_contacts()
+        if not items:
+            self.set_status("先点选联系人，Ctrl 多选，Shift 连选", DANGER)
+            return
+        self._request_increase(items)
 
     def _on_copy(self, proxy_index: QModelIndex) -> None:
         item = self._contact_from_proxy(proxy_index)
         if not item:
             return
-        QApplication.clipboard().setText(f"{item.uid} {plain_amount(item.amount_decimal)}")
-        self.set_status(f"已复制 {item.uid} {plain_amount(item.amount_decimal)}", SUCCESS)
+        text = uid_amount_line(item.uid, item.amount_decimal)
+        QApplication.clipboard().setText(text)
+        self.set_status(f"已复制 {text}", SUCCESS)
+
+    def _refresh_batch_btn(self, *_: Any) -> None:
+        n = len(self._selected_contacts())
+        self.batch_btn.setText(f"增加所选 · {n}" if n else "增加所选")
+        self.batch_btn.setEnabled(n > 0 and not self._busy)
 
     def _refresh_count(self, *_: Any) -> None:
         shown = self.proxy.rowCount()
         total = self.model.rowCount()
-        self.count_label.setText(f"{shown} 人" if shown == total else f"{shown} / {total} 人")
+        selected = len(self._selected_contacts())
+        base = f"{shown} 人" if shown == total else f"{shown} / {total} 人"
+        self.count_label.setText(f"{base} · 已选 {selected}" if selected else base)
         empty = shown == 0
         self.empty_label.setVisible(empty)
         self.table.setVisible(not empty)
+        self._refresh_batch_btn()
 
     def _emit_visible_avatars(self, *_args) -> None:
         ids: list[int] = []
