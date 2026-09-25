@@ -84,7 +84,7 @@ from ui.nullshield_page import NullShieldPage
 from ui.score_page import ScorePage
 
 APP_NAME = "导师小帮手"
-APP_VERSION = "v1.3"
+APP_VERSION = "v1.4"
 SEND_TAB = 2
 
 BG = "#12151c"
